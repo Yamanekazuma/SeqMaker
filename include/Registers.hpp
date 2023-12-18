@@ -1,29 +1,13 @@
 #pragma once
 
+#include "types/Registers.h"
+
 #include <Zydis/Zydis.h>
 
 #include <cstdint>
 #include <stdexcept>
 
 namespace Seq {
-
-extern "C" struct Registers {
-  std::uint32_t EAX;
-  std::uint32_t EBX;
-  std::uint32_t ECX;
-  std::uint32_t EDX;
-  std::uint32_t EBP;
-  std::uint32_t ESP;
-  std::uint32_t ESI;
-  std::uint32_t EDI;
-  std::uint32_t EIP;
-  std::uint16_t DS;
-  std::uint16_t ES;
-  std::uint16_t CS;
-  std::uint16_t SS;
-  std::uint16_t FS;
-  std::uint16_t GS;
-};
 
 class RegisterMaster {
 public:
