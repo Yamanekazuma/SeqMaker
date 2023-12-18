@@ -76,7 +76,7 @@ SEQ_MAKER_EXPORT const char* SeqMaker_CreateTriGram(SEQMAKER seq) {
   }
   SeqMaker* p = static_cast<SeqMaker*>(seq);
   try {
-    auto&& ngram = p->createNGram<1>();
+    auto&& ngram = p->createNGram<3>();
     return ngram.toString().c_str();
   } catch (const runtime_error& e) {
     return nullptr;
