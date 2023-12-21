@@ -5,11 +5,13 @@
 #include "SeqUnit.hpp"
 
 #include <handleapi.h>
+
 #include <memoryapi.h>
 #include <processthreadsapi.h>
 #include <winnt.h>
 #include <concepts>
 #include <cstdint>
+#include <cstring>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -17,9 +19,20 @@
 
 namespace Seq {
 
+class ISeqMaker {
+public:
+  virtual ~ISeqMaker() = 0;
+  virtual void addInstruction(const Registers& regs) = 0;
+  virtual char* createUniGramString() const = 0;
+  virtual char* createBiGramString() const = 0;
+  virtual char* createTriGramString() const = 0;
+};
+
+ISeqMaker::~ISeqMaker() {}
+
 template <class U>
   requires std::is_base_of_v<SeqUnit, U>
-class SeqMaker {
+class SeqMaker : public ISeqMaker {
 public:
   inline SeqMaker(std::uint32_t pid) : hProcess_{}, seq_{} {
     hProcess_ = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
@@ -56,8 +69,12 @@ public:
     seq_.emplace_back(hProcess_, regs, std::move(inst));
   }
 
+  inline char* createUniGramString() const { return strdup(createNGramSpec<1>().toString().c_str()); }
+  inline char* createBiGramString() const { return strdup(createNGramSpec<2>().toString().c_str()); }
+  inline char* createTriGramString() const { return strdup(createNGramSpec<3>().toString().c_str()); }
+
   template <std::size_t N>
-  inline const NGram::NGram<U, N> createNGram() const {
+  inline const NGram::NGram<U, N> createNGramSpec() const {
     return NGram::NGram<U, N>{seq_};
   }
 

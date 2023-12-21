@@ -5,7 +5,6 @@
 #include "SeqUnitOriginal.hpp"
 
 #include <cstdint>
-#include <cstring>
 #include <stdexcept>
 
 using namespace std;
@@ -14,8 +13,25 @@ using namespace Seq;
 class SEQMAKER_ {
 public:
   SEQ_UNITS unit;
-  void* seq;
+  ISeqMaker* seq;
 };
+
+static ISeqMaker* ToSeqMaker(SEQMAKER_* s) {
+  if (s == nullptr) {
+    return nullptr;
+  }
+
+  switch (s->unit) {
+    case SEQ_UNIT_ORIGINAL:
+      return static_cast<SeqMaker<SeqUnitOriginal>*>(s->seq);
+    case SEQ_UNIT_MNEMONIC:
+      return static_cast<SeqMaker<SeqUnitMnemonic>*>(s->seq);
+    case SEQ_UNIT_OPCODE:
+      return static_cast<SeqMaker<SeqUnitOpcode>*>(s->seq);
+    default:
+      return nullptr;
+  }
+}
 
 extern "C" {
 
@@ -57,7 +73,7 @@ SEQ_MAKER_EXPORT void SeqMaker_DeInit(SEQMAKER seq) {
   }
 
   SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  if (s->seq != nullptr && (s->unit == SEQ_UNIT_ORIGINAL || s->unit == SEQ_UNIT_MNEMONIC || s->unit == SEQ_UNIT_OPCODE)) {
+  if (s->unit == SEQ_UNIT_ORIGINAL || s->unit == SEQ_UNIT_MNEMONIC || s->unit == SEQ_UNIT_OPCODE) {
     switch (s->unit) {
       case SEQ_UNIT_ORIGINAL:
         delete static_cast<SeqMaker<SeqUnitOriginal>*>(s->seq);
@@ -70,7 +86,6 @@ SEQ_MAKER_EXPORT void SeqMaker_DeInit(SEQMAKER seq) {
         break;
     }
   }
-
   s->seq = nullptr;
   delete s;
 }
@@ -79,113 +94,71 @@ SEQ_MAKER_EXPORT bool SeqMaker_AddInstruction(SEQMAKER seq, const Registers* reg
   if (seq == nullptr || regs == nullptr) {
     return true;
   }
-  SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  if (s->unit != SEQ_UNIT_ORIGINAL && s->unit != SEQ_UNIT_MNEMONIC && s->unit != SEQ_UNIT_OPCODE) {
+
+  ISeqMaker* p = ToSeqMaker(static_cast<SEQMAKER_*>(seq));
+  if (p == nullptr) {
     return true;
   }
 
   try {
-    switch (s->unit) {
-      case SEQ_UNIT_ORIGINAL:
-        static_cast<SeqMaker<SeqUnitOriginal>*>(s->seq)->addInstruction(*regs);
-        break;
-      case SEQ_UNIT_MNEMONIC:
-        static_cast<SeqMaker<SeqUnitMnemonic>*>(s->seq)->addInstruction(*regs);
-        break;
-      case SEQ_UNIT_OPCODE:
-        static_cast<SeqMaker<SeqUnitOpcode>*>(s->seq)->addInstruction(*regs);
-        break;
-    }
+    p->addInstruction(*regs);
+    return false;
   } catch (const runtime_error& e) {
     return true;
   }
-  return false;
 }
 
 SEQ_MAKER_EXPORT char* SeqMaker_CreateUniGram(SEQMAKER seq) {
   if (seq == nullptr) {
     return nullptr;
   }
+
   SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  if (s->unit != SEQ_UNIT_ORIGINAL && s->unit != SEQ_UNIT_MNEMONIC && s->unit != SEQ_UNIT_OPCODE) {
+  ISeqMaker* p = ToSeqMaker(s);
+  if (p == nullptr) {
     return nullptr;
   }
 
-  const char* ngram_cstr = nullptr;
   try {
-    switch (s->unit) {
-      case SEQ_UNIT_ORIGINAL:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitOriginal>*>(seq)->createNGram<1>().toString().c_str();
-        break;
-      case SEQ_UNIT_MNEMONIC:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitMnemonic>*>(seq)->createNGram<1>().toString().c_str();
-        break;
-      case SEQ_UNIT_OPCODE:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitOpcode>*>(seq)->createNGram<1>().toString().c_str();
-        break;
-    }
+    return p->createUniGramString();
   } catch (const runtime_error& e) {
     return nullptr;
   }
-
-  return strdup(ngram_cstr);
 }
 
 SEQ_MAKER_EXPORT char* SeqMaker_CreateBiGram(SEQMAKER seq) {
   if (seq == nullptr) {
     return nullptr;
   }
+
   SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  if (s->unit != SEQ_UNIT_ORIGINAL && s->unit != SEQ_UNIT_MNEMONIC && s->unit != SEQ_UNIT_OPCODE) {
+  ISeqMaker* p = ToSeqMaker(s);
+  if (p == nullptr) {
     return nullptr;
   }
 
-  const char* ngram_cstr = nullptr;
   try {
-    switch (s->unit) {
-      case SEQ_UNIT_ORIGINAL:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitOriginal>*>(seq)->createNGram<2>().toString().c_str();
-        break;
-      case SEQ_UNIT_MNEMONIC:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitMnemonic>*>(seq)->createNGram<2>().toString().c_str();
-        break;
-      case SEQ_UNIT_OPCODE:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitOpcode>*>(seq)->createNGram<2>().toString().c_str();
-        break;
-    }
+    return p->createBiGramString();
   } catch (const runtime_error& e) {
     return nullptr;
   }
-
-  return strdup(ngram_cstr);
 }
 
 SEQ_MAKER_EXPORT char* SeqMaker_CreateTriGram(SEQMAKER seq) {
   if (seq == nullptr) {
     return nullptr;
   }
+
   SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  if (s->unit != SEQ_UNIT_ORIGINAL && s->unit != SEQ_UNIT_MNEMONIC && s->unit != SEQ_UNIT_OPCODE) {
+  ISeqMaker* p = ToSeqMaker(s);
+  if (p == nullptr) {
     return nullptr;
   }
 
-  const char* ngram_cstr = nullptr;
   try {
-    switch (s->unit) {
-      case SEQ_UNIT_ORIGINAL:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitOriginal>*>(seq)->createNGram<3>().toString().c_str();
-        break;
-      case SEQ_UNIT_MNEMONIC:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitMnemonic>*>(seq)->createNGram<3>().toString().c_str();
-        break;
-      case SEQ_UNIT_OPCODE:
-        ngram_cstr = static_cast<SeqMaker<SeqUnitOpcode>*>(seq)->createNGram<3>().toString().c_str();
-        break;
-    }
+    return p->createTriGramString();
   } catch (const runtime_error& e) {
     return nullptr;
   }
-
-  return strdup(ngram_cstr);
 }
 }
