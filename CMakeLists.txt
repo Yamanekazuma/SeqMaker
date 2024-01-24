@@ -43,7 +43,7 @@ install (
 
 install (
 	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shared/
-	DESTINATION include
+	DESTINATION include/SeqMaker/
 )
 
 install (
