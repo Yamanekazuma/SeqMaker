@@ -1,4 +1,4 @@
-#include <SeqUnit.hpp>
+#include <SeqUnitOriginal.hpp>
 
 #include <memoryapi.h>
 #include <processthreadsapi.h>
@@ -103,9 +103,10 @@ SrcInfo::SrcInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedOpera
   }
 }
 
-SeqUnit::SeqUnit(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst) : mnemonic_{}, dest_{}, src1_{}, src2_{} {
+SeqUnitOriginal::SeqUnitOriginal(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst)
+    : mnemonic_{}, dest_{}, src1_{}, src2_{} {
   const char* mnemonic = ZydisMnemonicGetString(inst.info.mnemonic);
-  if (mnemonic == NULL) {
+  if (mnemonic == nullptr) {
     throw std::runtime_error("不明な命令を検出しました．");
   }
   mnemonic_ = mnemonic;
