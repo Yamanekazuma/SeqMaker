@@ -36,7 +36,7 @@ target_include_directories (
 
 install (
 	TARGETS "SeqMaker"
-	EXPORT SeqMaker-config
+	EXPORT seqmaker-config
   RUNTIME DESTINATION lib
 	ARCHIVE DESTINATION lib
 )
@@ -47,7 +47,7 @@ install (
 )
 
 install (
-	EXPORT SeqMaker-config
+	EXPORT seqmaker-config
 	NAMESPACE SeqMaker::
 	DESTINATION cmake
 )
