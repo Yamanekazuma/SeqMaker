@@ -7,7 +7,7 @@
 namespace Seq {
 
 class SeqUnitMnemonic : public SeqUnit {
-public:
+ public:
   inline SeqUnitMnemonic() noexcept {}
   SeqUnitMnemonic(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
 
@@ -22,10 +22,10 @@ public:
       mnemonic: ニーモニック
     }
     */
-    return std::vformat("{mnemonic: {}}", std::make_format_args(mnemonic_));
+    return std::format("{{mnemonic: {}}}", mnemonic_);
   }
 
-private:
+ private:
   std::string mnemonic_;
 };
 
