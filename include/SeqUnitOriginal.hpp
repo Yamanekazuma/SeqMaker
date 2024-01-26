@@ -11,7 +11,7 @@
 namespace Seq {
 
 class OperandInfo {
-public:
+ public:
   virtual ~OperandInfo() = 0;
 
   enum class Values {
@@ -51,7 +51,7 @@ public:
 
   inline bool isMemoryAccess() const noexcept { return val_ != Values::NonMemoryAccess; }
 
-protected:
+ protected:
   Values val_;
 
   static std::uint32_t calcMemoryAddress(const Registers& regs, const ZydisDecodedOperandMem& mem);
@@ -59,7 +59,7 @@ protected:
 };
 
 class DestInfo : public OperandInfo {
-public:
+ public:
   DestInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedOperand& op);
 
   DestInfo(DestInfo&&) = default;
@@ -69,7 +69,7 @@ public:
 };
 
 class SrcInfo : public OperandInfo {
-public:
+ public:
   SrcInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedOperand& op);
 
   SrcInfo(SrcInfo&&) = default;
@@ -79,7 +79,7 @@ public:
 };
 
 class SeqUnitOriginal : public SeqUnit {
-public:
+ public:
   inline SeqUnitOriginal() noexcept {}
   SeqUnitOriginal(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
 
@@ -97,25 +97,18 @@ public:
       src2: None|NonMemoryAccess|MemoryAccess
     }
     */
-    return std::vformat("{mnemonic: {}, dest: {}, src1: {}, src2: {}}",
-                        std::make_format_args(mnemonic_, dest_->toString(), src1_->toString(), src2_->toString()));
+    return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}}}", mnemonic_, dest_->toString(), src1_->toString(), src2_->toString());
   }
 
-private:
+ private:
   std::string mnemonic_;
   std::optional<DestInfo> dest_;
   std::optional<SrcInfo> src1_;
   std::optional<SrcInfo> src2_;
 
-  inline bool isDestOperand(const ZydisDecodedOperand& op) const noexcept {
-    return !dest_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_WRITE);
-  }
-  inline bool isSrc1Operand(const ZydisDecodedOperand& op) const noexcept {
-    return !src1_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_READ);
-  }
-  inline bool isSrc2Operand(const ZydisDecodedOperand& op) const noexcept {
-    return !src2_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_READ);
-  }
+  inline bool isDestOperand(const ZydisDecodedOperand& op) const noexcept { return !dest_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_WRITE); }
+  inline bool isSrc1Operand(const ZydisDecodedOperand& op) const noexcept { return !src1_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_READ); }
+  inline bool isSrc2Operand(const ZydisDecodedOperand& op) const noexcept { return !src2_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_READ); }
 };
 
 };  // namespace Seq

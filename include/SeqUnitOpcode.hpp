@@ -4,10 +4,12 @@
 
 #include <format>
 
+#include <iostream>
+
 namespace Seq {
 
 class SeqUnitOpcode : public SeqUnit {
-public:
+ public:
   inline SeqUnitOpcode() noexcept {}
   SeqUnitOpcode(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
 
@@ -22,10 +24,10 @@ public:
       opcode: オペコード
     }
     */
-    return std::vformat("{opcode: {:02X}}", std::make_format_args(opcode_));
+    return std::format("{{opcode: {:02X}}}", opcode_);
   }
 
-private:
+ private:
   ZyanU8 opcode_;
 };
 
