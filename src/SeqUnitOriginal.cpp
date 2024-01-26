@@ -10,6 +10,8 @@ using namespace Seq;
 OperandInfo::~OperandInfo() {}
 
 std::uint32_t OperandInfo::calcMemoryAddress(const Registers& regs, const ZydisDecodedOperandMem& mem) {
+  assert(mem.segment != ZYDIS_REGISTER_FS);
+
   // base取得
   std::uint32_t base = 0;
   if (mem.base != ZYDIS_REGISTER_NONE) {
@@ -31,12 +33,7 @@ std::uint32_t OperandInfo::calcMemoryAddress(const Registers& regs, const ZydisD
   // scale取得
   std::uint32_t scale = mem.scale;
 
-  if (mem.segment != ZYDIS_REGISTER_FS) {
-    return disp + base + index * scale;
-  } else {
-    std::uint32_t fs = regs.FS;
-    return fs * 16 + disp + base + index * scale;
-  }
+  return disp + base + index * scale;
 }
 
 Protections OperandInfo::getMemoryProtection(HANDLE hProcess, std::uint32_t address) {
@@ -53,7 +50,12 @@ DestInfo::DestInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedOpe
     return;
   }
 
-  Protections protect = getMemoryProtection(hProcess, calcMemoryAddress(regs, op.mem));
+  Protections protect;
+  if (op.mem.segment == ZYDIS_REGISTER_FS) {
+    protect = Protections::RW;
+  } else {
+    protect = getMemoryProtection(hProcess, calcMemoryAddress(regs, op.mem));
+  }
   if (!ProtectionMaster::isWritable(protect)) {
     throw std::runtime_error("書き込み不可領域への書き込みを検出しました．");
   }
@@ -81,7 +83,12 @@ SrcInfo::SrcInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedOpera
     return;
   }
 
-  Protections protect = getMemoryProtection(hProcess, calcMemoryAddress(regs, op.mem));
+  Protections protect;
+  if (op.mem.segment == ZYDIS_REGISTER_FS) {
+    protect = Protections::RW;
+  } else {
+    protect = getMemoryProtection(hProcess, calcMemoryAddress(regs, op.mem));
+  }
   if (!ProtectionMaster::isReadable(protect)) {
     throw std::runtime_error("読み出し不可領域からの読み出しを検出しました．");
   }

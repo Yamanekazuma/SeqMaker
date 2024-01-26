@@ -4,8 +4,6 @@
 
 #include <format>
 
-#include <iostream>
-
 namespace Seq {
 
 class SeqUnitOpcode : public SeqUnit {
