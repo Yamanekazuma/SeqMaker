@@ -7,11 +7,20 @@
 #include <cstdint>
 #include <stdexcept>
 
+#ifdef NDEBUG
+#define debug_print(e)
+#else
+#include <iostream>
+static void debug_print(const std::exception& e) {
+  std::cerr << e.what() << std::endl;
+}
+#endif
+
 using namespace std;
 using namespace Seq;
 
 class SEQMAKER_ {
-public:
+ public:
   SEQ_UNITS unit;
   ISeqMaker* seq;
 };
@@ -60,6 +69,7 @@ SEQ_MAKER_EXPORT SEQMAKER SeqMaker_Init(uint32_t pid, SEQ_UNITS unit) {
         break;
     }
   } catch (const runtime_error& e) {
+    debug_print(e);
     delete s;
     return static_cast<SEQMAKER>(nullptr);
   }
@@ -104,6 +114,7 @@ SEQ_MAKER_EXPORT bool SeqMaker_AddInstruction(SEQMAKER seq, const Registers* reg
     p->addInstruction(*regs);
     return false;
   } catch (const runtime_error& e) {
+    debug_print(e);
     return true;
   }
 }
@@ -122,6 +133,7 @@ SEQ_MAKER_EXPORT char* SeqMaker_CreateUniGram(SEQMAKER seq) {
   try {
     return p->createUniGramString();
   } catch (const runtime_error& e) {
+    debug_print(e);
     return nullptr;
   }
 }
@@ -140,6 +152,7 @@ SEQ_MAKER_EXPORT char* SeqMaker_CreateBiGram(SEQMAKER seq) {
   try {
     return p->createBiGramString();
   } catch (const runtime_error& e) {
+    debug_print(e);
     return nullptr;
   }
 }
@@ -158,6 +171,7 @@ SEQ_MAKER_EXPORT char* SeqMaker_CreateTriGram(SEQMAKER seq) {
   try {
     return p->createTriGramString();
   } catch (const runtime_error& e) {
+    debug_print(e);
     return nullptr;
   }
 }
