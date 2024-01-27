@@ -9,7 +9,7 @@ namespace NGram {
 
 template <typename T, std::size_t N>
 class NGram {
-public:
+ public:
   NGram(const std::vector<T>& data) : ngram_{} {
     if (data.size() < N) {
       throw std::runtime_error("入力データが短すぎます．");
@@ -41,12 +41,12 @@ public:
       str += static_cast<std::string>(arr[N - 1]);
       str += ")\n";
     }
-    str += "}\n";
+    str += "}";
 
     return str;
   }
 
-private:
+ private:
   std::vector<std::array<T, N>> ngram_;
 };
 
