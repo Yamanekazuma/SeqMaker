@@ -45,7 +45,7 @@ class OperandInfo {
       case Values::MemoryAccessRWX:
         return "MemoryAccess{RWX}";
       default:
-        return "";
+        return "None";
     }
   }
 
