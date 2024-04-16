@@ -119,7 +119,7 @@ SEQ_MAKER_EXPORT bool SeqMaker_AddInstruction(SEQMAKER seq, const Registers* reg
   }
 }
 
-SEQ_MAKER_EXPORT char* SeqMaker_CreateUniGram(SEQMAKER seq) {
+SEQ_MAKER_EXPORT char* SeqMaker_CreateNGram(SEQMAKER seq, std::size_t n) {
   if (seq == nullptr) {
     return nullptr;
   }
@@ -131,45 +131,7 @@ SEQ_MAKER_EXPORT char* SeqMaker_CreateUniGram(SEQMAKER seq) {
   }
 
   try {
-    return p->createUniGramString();
-  } catch (const runtime_error& e) {
-    debug_print(e);
-    return nullptr;
-  }
-}
-
-SEQ_MAKER_EXPORT char* SeqMaker_CreateBiGram(SEQMAKER seq) {
-  if (seq == nullptr) {
-    return nullptr;
-  }
-
-  SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  ISeqMaker* p = ToSeqMaker(s);
-  if (p == nullptr) {
-    return nullptr;
-  }
-
-  try {
-    return p->createBiGramString();
-  } catch (const runtime_error& e) {
-    debug_print(e);
-    return nullptr;
-  }
-}
-
-SEQ_MAKER_EXPORT char* SeqMaker_CreateTriGram(SEQMAKER seq) {
-  if (seq == nullptr) {
-    return nullptr;
-  }
-
-  SEQMAKER_* s = static_cast<SEQMAKER_*>(seq);
-  ISeqMaker* p = ToSeqMaker(s);
-  if (p == nullptr) {
-    return nullptr;
-  }
-
-  try {
-    return p->createTriGramString();
+    return p->createNGramString(n);
   } catch (const runtime_error& e) {
     debug_print(e);
     return nullptr;
