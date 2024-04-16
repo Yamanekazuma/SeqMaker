@@ -26,7 +26,7 @@ class OperandInfo {
     MemoryAccessRWX,
   };
 
-  inline const std::string toString() const noexcept {
+  inline const std::string string() const noexcept {
     switch (val_) {
       case Values::NonMemoryAccess:
         return "NonMemoryAccess";
@@ -88,7 +88,7 @@ class SeqUnitOriginal : public SeqUnit {
   SeqUnitOriginal& operator=(SeqUnitOriginal&&) = default;
   SeqUnitOriginal& operator=(const SeqUnitOriginal&) = default;
 
-  inline const std::string toString() const noexcept override {
+  inline const std::string string() const noexcept override {
     /*
     {
       mnemonic: ニーモニック,
@@ -97,7 +97,7 @@ class SeqUnitOriginal : public SeqUnit {
       src2: None|NonMemoryAccess|MemoryAccess
     }
     */
-    return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}}}", mnemonic_, dest_->toString(), src1_->toString(), src2_->toString());
+    return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}}}", mnemonic_, dest_->string(), src1_->string(), src2_->string());
   }
 
  private:

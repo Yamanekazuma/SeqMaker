@@ -16,7 +16,7 @@ class SeqUnitOpcode : public SeqUnit {
   SeqUnitOpcode& operator=(SeqUnitOpcode&&) = default;
   SeqUnitOpcode& operator=(const SeqUnitOpcode&) = default;
 
-  inline const std::string toString() const noexcept override {
+  inline const std::string string() const noexcept override {
     /*
     {
       opcode: オペコード

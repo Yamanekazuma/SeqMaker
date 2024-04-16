@@ -11,9 +11,9 @@
 namespace Seq {
 
 class SeqUnit {
-public:
-  inline explicit virtual operator std::string() const noexcept { return toString(); }
-  virtual const std::string toString() const noexcept = 0;
+ public:
+  inline explicit virtual operator std::string() const noexcept { return string(); }
+  virtual const std::string string() const noexcept = 0;
 };
 
 };  // namespace Seq

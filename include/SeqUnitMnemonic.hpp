@@ -16,7 +16,7 @@ class SeqUnitMnemonic : public SeqUnit {
   SeqUnitMnemonic& operator=(SeqUnitMnemonic&&) = default;
   SeqUnitMnemonic& operator=(const SeqUnitMnemonic&) = default;
 
-  inline const std::string toString() const noexcept override {
+  inline const std::string string() const noexcept override {
     /*
     {
       mnemonic: ニーモニック
