@@ -8,7 +8,7 @@
 #include <format>
 #include <optional>
 
-namespace Seq {
+namespace seq {
 
 class OperandInfo {
  public:
@@ -26,7 +26,7 @@ class OperandInfo {
     MemoryAccessRWX,
   };
 
-  inline const std::string toString() const noexcept {
+  inline const std::string string() const noexcept {
     switch (val_) {
       case Values::NonMemoryAccess:
         return "NonMemoryAccess";
@@ -55,7 +55,7 @@ class OperandInfo {
   Values val_;
 
   static std::uint32_t calcMemoryAddress(const Registers& regs, const ZydisDecodedOperandMem& mem);
-  static Protection::Protections getMemoryProtection(HANDLE hProcess, std::uint32_t address);
+  static protect::Protections getMemoryProtection(HANDLE hProcess, std::uint32_t address);
 };
 
 class DestInfo : public OperandInfo {
@@ -88,7 +88,7 @@ class SeqUnitOriginal : public SeqUnit {
   SeqUnitOriginal& operator=(SeqUnitOriginal&&) = default;
   SeqUnitOriginal& operator=(const SeqUnitOriginal&) = default;
 
-  inline const std::string toString() const noexcept override {
+  inline const std::string string() const noexcept override {
     /*
     {
       mnemonic: ニーモニック,
@@ -97,7 +97,7 @@ class SeqUnitOriginal : public SeqUnit {
       src2: None|NonMemoryAccess|MemoryAccess
     }
     */
-    return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}}}", mnemonic_, dest_->toString(), src1_->toString(), src2_->toString());
+    return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}}}", mnemonic_, dest_->string(), src1_->string(), src2_->string());
   }
 
  private:
@@ -111,4 +111,4 @@ class SeqUnitOriginal : public SeqUnit {
   inline bool isSrc2Operand(const ZydisDecodedOperand& op) const noexcept { return !src2_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_READ); }
 };
 
-};  // namespace Seq
+};  // namespace seq

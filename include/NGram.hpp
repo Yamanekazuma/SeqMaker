@@ -5,11 +5,11 @@
 #include <utility>
 #include <vector>
 
-namespace NGram {
+namespace seq {
 
 template <typename T>
 class NGram {
-public:
+ public:
   NGram(const std::vector<T>& data, std::size_t n) : ngram_{} {
     if (data.size() < n) {
       throw std::runtime_error("入力データが短すぎます．");
@@ -30,8 +30,8 @@ public:
   NGram operator=(NGram&&) = delete;
   NGram operator=(const NGram&) = delete;
 
-  inline explicit operator std::string() const noexcept { return toString(); }
-  inline const std::string toString() const noexcept {
+  inline explicit operator std::string() const noexcept { return string(); }
+  inline const std::string string() const noexcept {
     std::string str{"{\n"};
     for (const auto& vec : ngram_) {
       str += '(';
@@ -47,9 +47,9 @@ public:
     return str;
   }
 
-private:
+ private:
   std::size_t n_;
   std::vector<std::vector<T>> ngram_;
 };
 
-}  // namespace NGram
+}  // namespace seq

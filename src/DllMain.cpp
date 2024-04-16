@@ -17,7 +17,7 @@ static void debug_print(const std::exception& e) {
 #endif
 
 using namespace std;
-using namespace Seq;
+using namespace seq;
 
 class SEQMAKER_ {
  public:

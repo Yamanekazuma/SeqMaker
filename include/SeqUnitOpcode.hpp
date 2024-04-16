@@ -4,7 +4,7 @@
 
 #include <format>
 
-namespace Seq {
+namespace seq {
 
 class SeqUnitOpcode : public SeqUnit {
  public:
@@ -16,7 +16,7 @@ class SeqUnitOpcode : public SeqUnit {
   SeqUnitOpcode& operator=(SeqUnitOpcode&&) = default;
   SeqUnitOpcode& operator=(const SeqUnitOpcode&) = default;
 
-  inline const std::string toString() const noexcept override {
+  inline const std::string string() const noexcept override {
     /*
     {
       opcode: オペコード
@@ -29,4 +29,4 @@ class SeqUnitOpcode : public SeqUnit {
   ZyanU8 opcode_;
 };
 
-};  // namespace Seq
+};  // namespace seq
