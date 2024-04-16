@@ -7,20 +7,21 @@
 
 namespace NGram {
 
-template <typename T, std::size_t N>
+template <typename T>
 class NGram {
- public:
-  NGram(const std::vector<T>& data) : ngram_{} {
-    if (data.size() < N) {
+public:
+  NGram(const std::vector<T>& data, std::size_t n) : ngram_{} {
+    if (data.size() < n) {
       throw std::runtime_error("入力データが短すぎます．");
     }
 
-    for (std::size_t i = 0; i < data.size() - (N - 1); ++i) {
-      std::array<T, N> arr{};
-      for (std::size_t j = 0; j < N; ++j) {
-        arr[j] = data[i + j];
+    n_ = n;
+    for (std::size_t i = 0; i < data.size() - (n - 1); ++i) {
+      std::vector<T> vec{n};
+      for (std::size_t j = 0; j < n; ++j) {
+        vec[j] = data[i + j];
       }
-      ngram_.emplace_back(std::move(arr));
+      ngram_.emplace_back(std::move(vec));
     }
   }
 
@@ -32,13 +33,13 @@ class NGram {
   inline explicit operator std::string() const noexcept { return toString(); }
   inline const std::string toString() const noexcept {
     std::string str{"{\n"};
-    for (const auto& arr : ngram_) {
+    for (const auto& vec : ngram_) {
       str += '(';
-      for (std::size_t i = 0; i < N - 1; ++i) {
-        str += static_cast<std::string>(arr[i]);
+      for (std::size_t i = 0; i < n_ - 1; ++i) {
+        str += static_cast<std::string>(vec[i]);
         str += ", ";
       }
-      str += static_cast<std::string>(arr[N - 1]);
+      str += static_cast<std::string>(vec[n_ - 1]);
       str += ")\n";
     }
     str += "}";
@@ -46,8 +47,9 @@ class NGram {
     return str;
   }
 
- private:
-  std::vector<std::array<T, N>> ngram_;
+private:
+  std::size_t n_;
+  std::vector<std::vector<T>> ngram_;
 };
 
 }  // namespace NGram

@@ -23,9 +23,7 @@ class ISeqMaker {
 public:
   virtual ~ISeqMaker() = 0;
   virtual void addInstruction(const Registers& regs) = 0;
-  virtual char* createUniGramString() const = 0;
-  virtual char* createBiGramString() const = 0;
-  virtual char* createTriGramString() const = 0;
+  virtual char* createNGramString(std::size_t n) const = 0;
 };
 
 ISeqMaker::~ISeqMaker() {}
@@ -69,14 +67,8 @@ public:
     seq_.emplace_back(hProcess_, regs, std::move(inst));
   }
 
-  inline char* createUniGramString() const { return strdup(createNGramSpec<1>().toString().c_str()); }
-  inline char* createBiGramString() const { return strdup(createNGramSpec<2>().toString().c_str()); }
-  inline char* createTriGramString() const { return strdup(createNGramSpec<3>().toString().c_str()); }
-
-  template <std::size_t N>
-  inline const NGram::NGram<U, N> createNGramSpec() const {
-    return NGram::NGram<U, N>{seq_};
-  }
+  inline const NGram::NGram<U> createNGram(size_t n) const { return NGram::NGram<U>{seq_, n}; }
+  inline char* createNGramString(std::size_t n) const override { return strdup(createNGram(n).toString().c_str()); }
 
 private:
   inline constexpr static std::size_t IA32_MAX_INST_LENGTH_ = 15;
