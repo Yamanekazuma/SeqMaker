@@ -4,7 +4,7 @@
 
 #include <format>
 
-namespace Seq {
+namespace seq {
 
 class SeqUnitOpcode : public SeqUnit {
  public:
@@ -29,4 +29,4 @@ class SeqUnitOpcode : public SeqUnit {
   ZyanU8 opcode_;
 };
 
-};  // namespace Seq
+};  // namespace seq

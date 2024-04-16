@@ -7,10 +7,10 @@
 #include <cstdint>
 #include <stdexcept>
 
-namespace Seq {
+namespace seq {
 
 class RegisterMaster {
-public:
+ public:
   RegisterMaster() = delete;
   RegisterMaster(RegisterMaster&&) = delete;
   RegisterMaster(const RegisterMaster&) = delete;
@@ -55,4 +55,4 @@ public:
   }
 };
 
-};  // namespace Seq
+};  // namespace seq

@@ -1,6 +1,6 @@
 #include <SeqUnitMnemonic.hpp>
 
-using namespace Seq;
+using namespace seq;
 
 SeqUnitMnemonic::SeqUnitMnemonic(HANDLE, const Registers&, ZydisDisassembledInstruction&& inst) : mnemonic_{} {
   const char* mnemonic = ZydisMnemonicGetString(inst.info.mnemonic);

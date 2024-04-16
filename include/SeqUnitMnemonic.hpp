@@ -4,7 +4,7 @@
 
 #include <format>
 
-namespace Seq {
+namespace seq {
 
 class SeqUnitMnemonic : public SeqUnit {
  public:
@@ -29,4 +29,4 @@ class SeqUnitMnemonic : public SeqUnit {
   std::string mnemonic_;
 };
 
-};  // namespace Seq
+};  // namespace seq

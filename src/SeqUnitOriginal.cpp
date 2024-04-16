@@ -4,8 +4,8 @@
 #include <processthreadsapi.h>
 #include <windef.h>
 
-using namespace Protection;
-using namespace Seq;
+using namespace seq;
+using namespace seq::protect;
 
 OperandInfo::~OperandInfo() {}
 

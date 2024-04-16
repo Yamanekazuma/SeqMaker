@@ -8,7 +8,7 @@
 #include <winnt.h>
 #include <string>
 
-namespace Seq {
+namespace seq {
 
 class SeqUnit {
  public:
@@ -16,4 +16,4 @@ class SeqUnit {
   virtual const std::string string() const noexcept = 0;
 };
 
-};  // namespace Seq
+};  // namespace seq

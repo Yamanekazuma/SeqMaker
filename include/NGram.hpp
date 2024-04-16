@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-namespace NGram {
+namespace seq {
 
 template <typename T>
 class NGram {
@@ -52,4 +52,4 @@ class NGram {
   std::vector<std::vector<T>> ngram_;
 };
 
-}  // namespace NGram
+}  // namespace seq

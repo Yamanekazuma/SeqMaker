@@ -17,10 +17,10 @@
 #include <utility>
 #include <vector>
 
-namespace Seq {
+namespace seq {
 
 class ISeqMaker {
-public:
+ public:
   virtual ~ISeqMaker() = 0;
   virtual void addInstruction(const Registers& regs) = 0;
   virtual char* createNGramString(std::size_t n) const = 0;
@@ -31,7 +31,7 @@ ISeqMaker::~ISeqMaker() {}
 template <class U>
   requires std::is_base_of_v<SeqUnit, U>
 class SeqMaker : public ISeqMaker {
-public:
+ public:
   inline SeqMaker(std::uint32_t pid) : hProcess_{}, seq_{} {
     hProcess_ = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
     // MSDN曰く、OpenProcess失敗時には「NULL」が返るとのことなので、
@@ -59,21 +59,20 @@ public:
     }
 
     ZydisDisassembledInstruction inst;
-    if (!ZYAN_SUCCESS(
-            ZydisDisassembleIntel(ZYDIS_MACHINE_MODE_LONG_COMPAT_32, static_cast<ZyanU64>(regs.EIP), buffer, sizeof(buffer), &inst))) {
+    if (!ZYAN_SUCCESS(ZydisDisassembleIntel(ZYDIS_MACHINE_MODE_LONG_COMPAT_32, static_cast<ZyanU64>(regs.EIP), buffer, sizeof(buffer), &inst))) {
       throw std::runtime_error("ディスアセンブルに失敗しました．");
     }
 
     seq_.emplace_back(hProcess_, regs, std::move(inst));
   }
 
-  inline const NGram::NGram<U> createNGram(size_t n) const { return NGram::NGram<U>{seq_, n}; }
-  inline char* createNGramString(std::size_t n) const override { return strdup(createNGram(n).toString().c_str()); }
+  inline const NGram<U> createNGram(size_t n) const { return NGram<U>{seq_, n}; }
+  inline char* createNGramString(std::size_t n) const override { return strdup(createNGram(n).string().c_str()); }
 
-private:
+ private:
   inline constexpr static std::size_t IA32_MAX_INST_LENGTH_ = 15;
   HANDLE hProcess_;
   std::vector<U> seq_;
 };
 
-}  // namespace Seq
+}  // namespace seq

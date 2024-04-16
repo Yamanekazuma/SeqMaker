@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <stdexcept>
 
-namespace Protection {
+namespace seq::protect {
 
 using protect_t = std::uint8_t;
 
@@ -22,7 +22,7 @@ enum class Protections : protect_t {
 };
 
 class ProtectionMaster {
-public:
+ public:
   ProtectionMaster() = delete;
   ProtectionMaster(ProtectionMaster&&) = delete;
   ProtectionMaster(const ProtectionMaster&) = delete;
@@ -54,4 +54,4 @@ public:
   }
 };
 
-}  // namespace Protection
+}  // namespace seq::protect

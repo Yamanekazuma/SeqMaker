@@ -8,7 +8,7 @@
 #include <format>
 #include <optional>
 
-namespace Seq {
+namespace seq {
 
 class OperandInfo {
  public:
@@ -55,7 +55,7 @@ class OperandInfo {
   Values val_;
 
   static std::uint32_t calcMemoryAddress(const Registers& regs, const ZydisDecodedOperandMem& mem);
-  static Protection::Protections getMemoryProtection(HANDLE hProcess, std::uint32_t address);
+  static protect::Protections getMemoryProtection(HANDLE hProcess, std::uint32_t address);
 };
 
 class DestInfo : public OperandInfo {
@@ -111,4 +111,4 @@ class SeqUnitOriginal : public SeqUnit {
   inline bool isSrc2Operand(const ZydisDecodedOperand& op) const noexcept { return !src2_.has_value() && (op.actions & ZYDIS_OPERAND_ACTION_READ); }
 };
 
-};  // namespace Seq
+};  // namespace seq
