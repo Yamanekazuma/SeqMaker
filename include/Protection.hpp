@@ -1,10 +1,8 @@
 #pragma once
 
 #include <windef.h>
-#include <winnt.h>
 
 #include <cstdint>
-#include <stdexcept>
 
 namespace seq::protect {
 
@@ -29,29 +27,11 @@ class ProtectionMaster {
   ProtectionMaster operator=(ProtectionMaster&&) = delete;
   ProtectionMaster operator=(const ProtectionMaster&) = delete;
 
-  static bool isReadable(Protections protect) { return (static_cast<protect_t>(protect) & static_cast<protect_t>(Protections::R)); }
-  static bool isWritable(Protections protect) { return (static_cast<protect_t>(protect) & static_cast<protect_t>(Protections::W)); }
+  static bool isReadable(Protections protect) noexcept;
+  static bool isWritable(Protections protect) noexcept;
 
-  static Protections convertFromWinConsts(ULONG win_memory_protection_consts) {
-    switch (win_memory_protection_consts) {
-      case PAGE_READONLY:
-        return Protections::R;
-      case PAGE_EXECUTE:
-        return Protections::X;
-      case PAGE_READWRITE:
-        [[fallthrough]];
-      case PAGE_WRITECOPY:
-        return Protections::RW;
-      case PAGE_EXECUTE_READ:
-        return Protections::RX;
-      case PAGE_EXECUTE_READWRITE:
-        [[fallthrough]];
-      case PAGE_EXECUTE_WRITECOPY:
-        return Protections::RWX;
-      default:
-        return Protections::None;
-    }
-  }
+  static Protections convertFromWinConsts(ULONG win_memory_protection_consts) noexcept;
+  static Protections queryMemoryProtection(HANDLE hProcess, std::uint32_t address);
 };
 
 }  // namespace seq::protect

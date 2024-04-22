@@ -2,31 +2,25 @@
 
 #include "SeqUnit.hpp"
 
-#include <format>
-
 namespace seq {
 
 class SeqUnitOpcode : public SeqUnit {
  public:
-  inline SeqUnitOpcode() noexcept {}
-  SeqUnitOpcode(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
-
   SeqUnitOpcode(SeqUnitOpcode&&) = default;
   SeqUnitOpcode(const SeqUnitOpcode&) = default;
   SeqUnitOpcode& operator=(SeqUnitOpcode&&) = default;
   SeqUnitOpcode& operator=(const SeqUnitOpcode&) = default;
 
-  inline const std::string string() const noexcept override {
-    /*
-    {
-      opcode: オペコード
-    }
-    */
-    return std::format("{{opcode: {:02X}}}", opcode_);
-  }
-
  private:
   ZyanU8 opcode_;
+
+  SeqUnitOpcode(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
+
+  template <class U>
+    requires std::is_base_of_v<SeqUnit, U>
+  friend class SeqUnitFactory;
+
+  std::string makeString() noexcept override;
 };
 
 };  // namespace seq
