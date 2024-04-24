@@ -14,7 +14,7 @@ class SeqUnitOpcode : public SeqUnit {
  private:
   ZyanU8 opcode_;
 
-  SeqUnitOpcode(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
+  SeqUnitOpcode(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
 
   template <class U>
     requires std::is_base_of_v<SeqUnit, U>

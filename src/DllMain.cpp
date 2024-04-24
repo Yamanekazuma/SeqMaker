@@ -25,22 +25,11 @@ class SEQMAKER_ {
   ISeqMaker* seq;
 };
 
-static ISeqMaker* ToSeqMaker(SEQMAKER_* s) {
-  if (s == nullptr) {
-    return nullptr;
-  }
+static ISeqMaker* ToSeqMaker(SEQMAKER_* s) noexcept;
 
-  switch (s->unit) {
-    case SEQ_UNIT_ORIGINAL:
-      return static_cast<SeqMaker<SeqUnitOriginal>*>(s->seq);
-    case SEQ_UNIT_MNEMONIC:
-      return static_cast<SeqMaker<SeqUnitMnemonic>*>(s->seq);
-    case SEQ_UNIT_OPCODE:
-      return static_cast<SeqMaker<SeqUnitOpcode>*>(s->seq);
-    default:
-      return nullptr;
-  }
-}
+static bool GetUnitDataInfo_is_call(const SeqUnit& unit, bool& output) noexcept;
+static bool GetUnitDataInfo_is_jmp(const SeqUnit& unit, bool& output) noexcept;
+static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noexcept;
 
 extern "C" {
 
@@ -100,22 +89,39 @@ SEQ_MAKER_EXPORT void SeqMaker_DeInit(SEQMAKER seq) {
   delete s;
 }
 
-SEQ_MAKER_EXPORT bool SeqMaker_AddInstruction(SEQMAKER seq, const Registers* regs) {
+SEQ_MAKER_EXPORT SEQ_UNITDATA SeqMaker_AddInstruction(SEQMAKER seq, const Registers* regs) {
   if (seq == nullptr || regs == nullptr) {
-    return true;
+    return nullptr;
   }
 
-  ISeqMaker* p = ToSeqMaker(static_cast<SEQMAKER_*>(seq));
+  auto p = ToSeqMaker(static_cast<SEQMAKER_*>(seq));
   if (p == nullptr) {
-    return true;
+    return nullptr;
   }
 
   try {
-    p->addInstruction(*regs);
-    return false;
+    return static_cast<SEQ_UNITDATA>(&(p->addInstruction(*regs)));
   } catch (const runtime_error& e) {
     debug_print(e);
+    return nullptr;
+  }
+}
+
+SEQ_MAKER_EXPORT bool SeqMaker_GetUnitDataInfo(SEQ_UNITDATA unit, SEQ_UNITINFO_CONSTS info, void* output) {
+  if (unit == nullptr || output == nullptr) {
     return true;
+  }
+
+  auto u = static_cast<const SeqUnit*>(unit);
+  switch (info) {
+    case SEQ_UNITINFO_IS_CALL:
+      return GetUnitDataInfo_is_call(*u, *static_cast<bool*>(output));
+    case SEQ_UNITINFO_IS_JMP:
+      return GetUnitDataInfo_is_jmp(*u, *static_cast<bool*>(output));
+    case SEQ_UNITINFO_BRANCH_TO:
+      return GetUnitDataInfo_branch_to(*u, *static_cast<uint32_t*>(output));
+    default:
+      return true;
   }
 }
 
@@ -137,4 +143,40 @@ SEQ_MAKER_EXPORT char* SeqMaker_CreateNGram(SEQMAKER seq, std::size_t n) {
     return nullptr;
   }
 }
+}
+
+static ISeqMaker* ToSeqMaker(SEQMAKER_* s) noexcept {
+  if (s == nullptr) {
+    return nullptr;
+  }
+
+  switch (s->unit) {
+    case SEQ_UNIT_ORIGINAL:
+      return static_cast<SeqMaker<SeqUnitOriginal>*>(s->seq);
+    case SEQ_UNIT_MNEMONIC:
+      return static_cast<SeqMaker<SeqUnitMnemonic>*>(s->seq);
+    case SEQ_UNIT_OPCODE:
+      return static_cast<SeqMaker<SeqUnitOpcode>*>(s->seq);
+    default:
+      return nullptr;
+  }
+}
+
+static bool GetUnitDataInfo_is_call(const SeqUnit& unit, bool& output) noexcept {
+  output = unit.isInstructionOf(ZYDIS_MNEMONIC_CALL);
+  return false;
+}
+
+static bool GetUnitDataInfo_is_jmp(const SeqUnit& unit, bool& output) noexcept {
+  output = unit.isInstructionOf(ZYDIS_MNEMONIC_JMP);
+  return false;
+}
+
+static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noexcept {
+  if (!unit.isInstructionOf(ZYDIS_MNEMONIC_CALL) && !unit.isInstructionOf(ZYDIS_MNEMONIC_JMP)) {
+    return true;
+  }
+
+  output = unit.operand(0);
+  return false;
 }

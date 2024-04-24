@@ -25,7 +25,7 @@ namespace seq {
 class ISeqMaker {
  public:
   virtual ~ISeqMaker() = 0;
-  virtual void addInstruction(const Registers& regs) = 0;
+  virtual const SeqUnit& addInstruction(const Registers& regs) = 0;
   virtual char* createNGramString(std::size_t n) const = 0;
 };
 
@@ -43,7 +43,7 @@ class SeqMaker : public ISeqMaker {
   SeqMaker operator=(SeqMaker&&) = delete;
   SeqMaker operator=(const SeqMaker&) = delete;
 
-  void addInstruction(const Registers& regs) override;
+  const SeqUnit& addInstruction(const Registers& regs) override;
   char* createNGramString(std::size_t n) const override;
 
  private:
@@ -70,7 +70,7 @@ SeqMaker<U>::~SeqMaker() noexcept {
 
 template <class U>
   requires std::is_base_of_v<SeqUnit, U>
-void SeqMaker<U>::addInstruction(const Registers& regs) {
+const SeqUnit& SeqMaker<U>::addInstruction(const Registers& regs) {
   std::uint8_t buffer[IA32_MAX_INST_LENGTH_]{};
 
   if (ReadProcessMemory(hProcess_, std::bit_cast<LPCVOID>(static_cast<uintptr_t>(regs.EIP)), buffer, sizeof(buffer), nullptr) == 0) {
@@ -82,7 +82,8 @@ void SeqMaker<U>::addInstruction(const Registers& regs) {
     throw std::runtime_error("ディスアセンブルに失敗しました．");
   }
 
-  seq_.push_back(SeqUnitFactory<U>::create(hProcess_, regs, std::move(inst)));
+  seq_.push_back(std::move(SeqUnitFactory<U>::create(hProcess_, regs, inst)));
+  return static_cast<const SeqUnit&>(seq_.back());
 }
 
 template <class U>
