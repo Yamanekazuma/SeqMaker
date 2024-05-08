@@ -33,6 +33,9 @@ class SeqUnit {
   bool isInstructionOf(ZydisMnemonic mnemonic) const noexcept;
   std::uint32_t operand(std::size_t no) const;
 
+  bool setNote(const char* note) noexcept;
+  const std::string note() const noexcept { return note_; }
+
  protected:
   const ZydisMnemonic mnemonic_;
   std::vector<IOperandInfo*> operands_;
@@ -40,7 +43,8 @@ class SeqUnit {
   std::vector<SrcInfo> allSrcOps_;
 
  private:
-  std::string str_;
+  std::string str_{};
+  std::string note_{};
 
   // Factoryを介さずにSeqUnitクラス群を作成してほしくないので
   // Factoryをfriendクラスにしつつ、子クラスのコンストラクタをprivateに記述

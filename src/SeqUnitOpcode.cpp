@@ -8,5 +8,5 @@ SeqUnitOpcode::SeqUnitOpcode(HANDLE hProcess, const Registers& regs, const Zydis
     : SeqUnit{hProcess, regs, inst}, opcode_{inst.info.opcode} {}
 
 std::string SeqUnitOpcode::makeString() noexcept {
-  return std::format("{{opcode: {:02X}}}", opcode_);
+  return std::format("{{opcode: {:02X}, note: {}}}", opcode_, note());
 }

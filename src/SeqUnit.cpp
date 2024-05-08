@@ -48,3 +48,12 @@ std::uint32_t SeqUnit::operand(std::size_t no) const {
     throw;
   }
 }
+
+bool SeqUnit::setNote(const char* note) noexcept {
+  try {
+    note_.assign(note);
+    return false;
+  } catch (...) {
+    return true;
+  }
+}
