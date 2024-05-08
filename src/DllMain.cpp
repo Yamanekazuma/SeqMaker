@@ -125,6 +125,15 @@ SEQ_MAKER_EXPORT bool SeqMaker_GetUnitDataInfo(SEQ_UNITDATA unit, SEQ_UNITINFO_C
   }
 }
 
+SEQ_MAKER_EXPORT bool SeqMaker_AddNote(SEQ_UNITDATA unit, const char* note) {
+  if (unit == nullptr) {
+    return true;
+  }
+
+  auto u = const_cast<SeqUnit*>(static_cast<const SeqUnit*>(unit));
+  return u->setNote(note);
+}
+
 SEQ_MAKER_EXPORT char* SeqMaker_CreateNGram(SEQMAKER seq, std::size_t n) {
   if (seq == nullptr) {
     return nullptr;

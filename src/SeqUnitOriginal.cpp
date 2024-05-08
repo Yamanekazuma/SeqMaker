@@ -24,8 +24,8 @@ SeqUnitOriginal::SeqUnitOriginal(HANDLE hProcess, const Registers& regs, const Z
 }
 
 std::string SeqUnitOriginal::makeString() noexcept {
-  return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}}}", mnemonic_, dest_.protection().string(), src1_.protection().string(),
-                     src2_.protection().string());
+  return std::format("{{mnemonic: {}, dest: {}, src1: {}, src2: {}, note: {}}}", mnemonic_, dest_.protection().string(), src1_.protection().string(),
+                     src2_.protection().string(), note());
 }
 
 static const char* instructionToMnemonic(const ZydisDisassembledInstruction& inst) {

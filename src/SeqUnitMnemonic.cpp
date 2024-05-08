@@ -11,7 +11,7 @@ SeqUnitMnemonic::SeqUnitMnemonic(HANDLE hProcess, const Registers& regs, const Z
     : SeqUnit{hProcess, regs, inst}, mnemonic_{instructionToMnemonic(inst)} {}
 
 std::string SeqUnitMnemonic::makeString() noexcept {
-  return std::format("{{mnemonic: {}}}", mnemonic_);
+  return std::format("{{mnemonic: {}, note: {}}}", mnemonic_, note());
 }
 
 static const char* instructionToMnemonic(const ZydisDisassembledInstruction& inst) {
