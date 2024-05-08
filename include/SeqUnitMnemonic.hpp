@@ -14,7 +14,7 @@ class SeqUnitMnemonic : public SeqUnit {
  private:
   std::string mnemonic_;
 
-  SeqUnitMnemonic(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
+  SeqUnitMnemonic(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
 
   template <class U>
     requires std::is_base_of_v<SeqUnit, U>

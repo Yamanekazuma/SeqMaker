@@ -46,11 +46,22 @@ enum class OperandType {
   Source,
 };
 
+class IOperandInfo {
+ public:
+  virtual const MemoryProtectionInfo& protection() const noexcept = 0;
+  virtual std::uint32_t accessingAddress() const noexcept = 0;
+
+  virtual bool isNone() const noexcept = 0;
+  virtual bool isMemoryAccessing() const noexcept = 0;
+
+  virtual OperandType getOperandType() const noexcept = 0;
+};
+
 template <OperandType T = OperandType::None>
-class OperandInfo {
+class OperandInfo : public IOperandInfo {
  public:
   OperandInfo() noexcept;
-  OperandInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedOperand& op);
+  OperandInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op);
 
   OperandInfo(OperandInfo<T>&& other) noexcept;
   OperandInfo<T>& operator=(OperandInfo<T>&& other) noexcept;
@@ -58,15 +69,17 @@ class OperandInfo {
   OperandInfo(const OperandInfo<T>&) = default;
   OperandInfo<T>& operator=(const OperandInfo<T>&) = default;
 
-  inline const MemoryProtectionInfo& protection() const noexcept { return protection_; }
-  inline std::uint32_t accessingAddress() const noexcept { return address_; }
+  inline const MemoryProtectionInfo& protection() const noexcept override { return protection_; }
+  inline std::uint32_t accessingAddress() const noexcept override { return address_; }
 
-  bool isNone() const noexcept;
-  bool isMemoryAccessing() const noexcept;
+  bool isNone() const noexcept override;
+  bool isMemoryAccessing() const noexcept override;
+
+  OperandType getOperandType() const noexcept override;
 
  private:
-  MemoryProtectionInfo protection_;
   std::uint32_t address_;
+  MemoryProtectionInfo protection_;
 };
 
 using DestInfo = OperandInfo<OperandType::Destination>;

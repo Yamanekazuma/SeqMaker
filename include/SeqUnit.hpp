@@ -1,13 +1,16 @@
 #pragma once
 
+#include "OperandInfo.hpp"
 #include "Registers.hpp"
 
 #include <Zydis/Zydis.h>
 
 #include <windef.h>
 
+#include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace seq {
 
@@ -17,13 +20,24 @@ template <class U>
   requires std::is_base_of_v<SeqUnit, U>
 class SeqUnitFactory {
  public:
-  static U create(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst);
+  static U create(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
 };
 
 class SeqUnit {
  public:
+  SeqUnit(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
+
   inline explicit operator std::string() const noexcept { return string(); }
   const std::string string() const noexcept { return str_; }
+
+  bool isInstructionOf(ZydisMnemonic mnemonic) const noexcept;
+  std::uint32_t operand(std::size_t no) const;
+
+ protected:
+  const ZydisMnemonic mnemonic_;
+  std::vector<IOperandInfo*> operands_;
+  std::vector<DestInfo> allDestOps_;
+  std::vector<SrcInfo> allSrcOps_;
 
  private:
   std::string str_;
@@ -40,7 +54,7 @@ class SeqUnit {
 
 template <class U>
   requires std::is_base_of_v<SeqUnit, U>
-U SeqUnitFactory<U>::create(HANDLE hProcess, const Registers& regs, ZydisDisassembledInstruction&& inst) {
+U SeqUnitFactory<U>::create(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst) {
   try {
     U unit{hProcess, regs, std::move(inst)};
     static_cast<SeqUnit&>(unit).makeString();
