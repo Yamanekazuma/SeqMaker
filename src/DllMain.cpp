@@ -30,6 +30,7 @@ static ISeqMaker* ToSeqMaker(SEQMAKER_* s) noexcept;
 static bool GetUnitDataInfo_is_call(const SeqUnit& unit, bool& output) noexcept;
 static bool GetUnitDataInfo_is_jmp(const SeqUnit& unit, bool& output) noexcept;
 static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noexcept;
+static bool GetUnitDataInfo_inst_length(const SeqUnit& unit, size_t& output) noexcept;
 
 extern "C" {
 
@@ -120,7 +121,10 @@ SEQ_MAKER_EXPORT bool SeqMaker_GetUnitDataInfo(SEQ_UNITDATA unit, SEQ_UNITINFO_C
       return GetUnitDataInfo_is_jmp(*u, *static_cast<bool*>(output));
     case SEQ_UNITINFO_BRANCH_TO:
       return GetUnitDataInfo_branch_to(*u, *static_cast<uint32_t*>(output));
+    case SEQ_UNITINFO_INST_LENGTH:
+      return GetUnitDataInfo_inst_length(*u, *static_cast<size_t*>(output));
     default:
+      assert("It should be unreachable.");
       return true;
   }
 }
@@ -187,5 +191,10 @@ static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noe
   }
 
   output = unit.operand(0);
+  return false;
+}
+
+static bool GetUnitDataInfo_inst_length(const SeqUnit& unit, size_t& output) noexcept {
+  output = unit.length();
   return false;
 }

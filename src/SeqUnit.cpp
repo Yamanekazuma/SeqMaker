@@ -3,7 +3,7 @@
 using namespace seq;
 
 SeqUnit::SeqUnit(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst)
-    : mnemonic_{inst.info.mnemonic}, operands_{}, allDestOps_{}, allSrcOps_{} {
+    : mnemonic_{inst.info.mnemonic}, operands_{}, allDestOps_{}, allSrcOps_{}, length_{inst.info.length} {
   try {
     std::vector<OperandType> types{10};
     std::size_t cnt = 0;

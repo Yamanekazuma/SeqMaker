@@ -36,6 +36,8 @@ class SeqUnit {
   bool setNote(const char* note) noexcept;
   const std::string note() const noexcept { return note_; }
 
+  std::size_t length() const noexcept { return length_; }
+
  protected:
   const ZydisMnemonic mnemonic_;
   std::vector<IOperandInfo*> operands_;
@@ -45,6 +47,7 @@ class SeqUnit {
  private:
   std::string str_{};
   std::string note_{};
+  std::size_t length_{};
 
   // Factoryを介さずにSeqUnitクラス群を作成してほしくないので
   // Factoryをfriendクラスにしつつ、子クラスのコンストラクタをprivateに記述
