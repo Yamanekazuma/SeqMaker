@@ -7,7 +7,7 @@ add_subdirectory("deps/zydis" EXCLUDE_FROM_ALL)
 
 FILE(GLOB SRCS "./src/*.cpp")
 FILE(GLOB INCLUDES "./include/*.hpp")
-FILE(GLOB SHARED "./shared/*.h")
+FILE(GLOB SHARED "./shared/SeqMaker/*.h")
 add_library("SeqMaker" SHARED ${SRCS} ${INCLUDES} ${SHARED})
 add_library(SeqMaker::SeqMaker ALIAS SeqMaker)
 

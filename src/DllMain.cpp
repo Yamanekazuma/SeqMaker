@@ -1,4 +1,5 @@
-#include "SeqMaker.h"
+#include "SeqMaker/SeqMaker.h"
+
 #include "SeqMaker.hpp"
 #include "SeqUnitMnemonic.hpp"
 #include "SeqUnitOpcode.hpp"
