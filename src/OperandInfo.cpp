@@ -123,8 +123,8 @@ OperandType OperandInfo<T>::getOperandType() const noexcept {
   return T;
 }
 
-template class OperandInfo<OperandType::Destination>;
-template class OperandInfo<OperandType::Source>;
+template class seq::OperandInfo<OperandType::Destination>;
+template class seq::OperandInfo<OperandType::Source>;
 
 static std::uint32_t calcAddress(const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op) noexcept {
   switch (op.type) {

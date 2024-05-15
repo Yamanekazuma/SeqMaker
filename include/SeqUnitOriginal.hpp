@@ -15,8 +15,8 @@ class SeqUnitOriginal : public SeqUnit {
  public:
   SeqUnitOriginal(SeqUnitOriginal&&) = default;
   SeqUnitOriginal(const SeqUnitOriginal&) = default;
-  SeqUnitOriginal& operator=(SeqUnitOriginal&&) = default;
-  SeqUnitOriginal& operator=(const SeqUnitOriginal&) = default;
+  SeqUnitOriginal& operator=(SeqUnitOriginal&&) = delete;
+  SeqUnitOriginal& operator=(const SeqUnitOriginal&) = delete;
 
  private:
   const std::string mnemonic_;

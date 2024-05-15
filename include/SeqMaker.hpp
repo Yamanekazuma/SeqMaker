@@ -89,7 +89,7 @@ const SeqUnit& SeqMaker<U>::addInstruction(const Registers& regs) {
 template <class U>
   requires std::is_base_of_v<SeqUnit, U>
 char* SeqMaker<U>::createNGramString(std::size_t n) const {
-  return strdup(NGram<U>{seq_, n}.string().c_str());
+  return _strdup(NGram<U>(seq_, n).string().c_str());
 }
 
 }  // namespace seq

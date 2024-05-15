@@ -24,7 +24,7 @@ target_compile_options("SeqMaker" PRIVATE
   "-Wextra"
   "-Werror"
   "-finput-charset=UTF-8"
-  "-fexec-charset=CP932"
+  "-fexec-charset=UTF-8"
   "-municode"
 )
 

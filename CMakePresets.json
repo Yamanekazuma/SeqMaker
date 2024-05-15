@@ -2,31 +2,69 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "linux-base",
+      "name": "windows-base",
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
-        "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe"
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
-      "name": "debug-linux",
-      "displayName": "x64 Debug for Linux",
-      "inherits": "linux-base",
+      "name": "clang",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "x64-clang",
+      "hidden": true,
+      "inherits": "clang",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_ARG1": "-m64",
+        "CMAKE_CXX_COMPILER_ARG1": "-m64"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "Debug",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "release-linux",
-      "displayName": "x64 Release for Linux",
-      "inherits": "linux-base",
+      "name": "Release",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "x64-Debug",
+      "displayName": "Debug build with Clang for x64",
+      "inherits": [
+        "windows-base",
+        "x64-clang",
+        "Debug"
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "displayName": "Release build with Clang for x64",
+      "inherits": [
+        "windows-base",
+        "x64-clang",
+        "Release"
+      ]
     }
   ]
 }

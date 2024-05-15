@@ -37,6 +37,8 @@ SeqUnit::SeqUnit(HANDLE hProcess, const Registers& regs, const ZydisDisassembled
   }
 }
 
+SeqUnit::~SeqUnit() {}
+
 bool SeqUnit::isInstructionOf(ZydisMnemonic mnemonic) const noexcept {
   return mnemonic_ == mnemonic;
 }

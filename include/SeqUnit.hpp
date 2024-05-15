@@ -27,6 +27,8 @@ class SeqUnit {
  public:
   SeqUnit(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
 
+  virtual ~SeqUnit() = 0;
+
   inline explicit operator std::string() const noexcept { return string(); }
   const std::string string() const noexcept { return str_; }
 
