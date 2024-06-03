@@ -62,38 +62,38 @@ OperandInfo<T>::OperandInfo() noexcept : address_{}, protection_{} {}
 
 template <OperandType T>
 OperandInfo<T>::OperandInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op)
-    : address_{calcAddress(regs, inst, op)}, value_{address_}, protection_{[&]() -> decltype(protection_) {
-        if (op.type == ZYDIS_OPERAND_TYPE_MEMORY) {
-          return protect::Protections::None;
-        }
+    : address_{calcAddress(regs, inst, op)}, value_{address_}, protection_{protect::Protections::None} {
+  if (op.type != ZYDIS_OPERAND_TYPE_MEMORY) {
+    return;
+  }
 
-        protect::Protections protection;
-        if (op.mem.segment == ZYDIS_REGISTER_FS) {
-          protection = protect::Protections::RW;
-        } else {
-          try {
-            protection = protect::ProtectionMaster::queryMemoryProtection(hProcess, address_);
-          } catch (...) {
-            protection = protect::Protections::None;
-          }
-        }
+  protect::Protections protection;
+  if (op.mem.segment == ZYDIS_REGISTER_FS) {
+    protection = protect::Protections::RW;
+  } else {
+    try {
+      protection = protect::ProtectionMaster::queryMemoryProtection(hProcess, address_);
+    } catch (...) {
+      protection = protect::Protections::None;
+    }
+  }
 
-        if (ReadProcessMemory(hProcess, reinterpret_cast<void*>(address_), &value_, sizeof(value_), nullptr) == 0) {
-          value_ = 0;
-        }
+  if (ReadProcessMemory(hProcess, reinterpret_cast<void*>(address_), &value_, sizeof(value_), nullptr) == 0) {
+    value_ = 0;
+  }
 
-        if constexpr (T == OperandType::Destination) {
-          if (!protect::ProtectionMaster::isWritable(protection)) {
-            throw std::runtime_error("書き込み不可領域への書き込みを検出しました．");
-          }
-        } else if constexpr (T == OperandType::Source) {
-          if (!protect::ProtectionMaster::isReadable(protection)) {
-            throw std::runtime_error("読み出し不可領域からの読み出しを検出しました．");
-          }
-        }
+  if constexpr (T == OperandType::Destination) {
+    if (!protect::ProtectionMaster::isWritable(protection)) {
+      throw std::runtime_error("書き込み不可領域への書き込みを検出しました．");
+    }
+  } else if constexpr (T == OperandType::Source) {
+    if (!protect::ProtectionMaster::isReadable(protection)) {
+      throw std::runtime_error("読み出し不可領域からの読み出しを検出しました．");
+    }
+  }
 
-        return protection;
-      }()} {}
+  protection_ = protection;
+}
 
 template <OperandType T>
 OperandInfo<T>& OperandInfo<T>::operator=(OperandInfo<T>&& other) noexcept {
