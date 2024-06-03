@@ -62,50 +62,56 @@ OperandInfo<T>::OperandInfo() noexcept : address_{}, protection_{} {}
 
 template <OperandType T>
 OperandInfo<T>::OperandInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op)
-    : address_{calcAddress(regs, inst, op)}, protection_{protect::Protections::None} {
-  if (op.type != ZYDIS_OPERAND_TYPE_MEMORY) {
-    return;
-  }
+    : address_{calcAddress(regs, inst, op)}, value_{address_}, protection_{[&]() -> decltype(protection_) {
+        if (op.type == ZYDIS_OPERAND_TYPE_MEMORY) {
+          return protect::Protections::None;
+        }
 
-  protect::Protections protection;
+        protect::Protections protection;
+        if (op.mem.segment == ZYDIS_REGISTER_FS) {
+          protection = protect::Protections::RW;
+        } else {
+          try {
+            protection = protect::ProtectionMaster::queryMemoryProtection(hProcess, address_);
+          } catch (...) {
+            protection = protect::Protections::None;
+          }
+        }
 
-  if (op.mem.segment == ZYDIS_REGISTER_FS) {
-    protection = protect::Protections::RW;
-  } else {
-    try {
-      protection = protect::ProtectionMaster::queryMemoryProtection(hProcess, address_);
-    } catch (...) {
-      // 参照不可領域
-      protection = protect::Protections::None;
-    }
-  }
+        if (ReadProcessMemory(hProcess, reinterpret_cast<void*>(address_), &value_, sizeof(value_), nullptr) == 0) {
+          value_ = 0;
+        }
 
-  if constexpr (T == OperandType::Destination) {
-    if (!protect::ProtectionMaster::isWritable(protection)) {
-      throw std::runtime_error("書き込み不可領域への書き込みを検出しました．");
-    }
-  } else if constexpr (T == OperandType::Source) {
-    if (!protect::ProtectionMaster::isReadable(protection)) {
-      throw std::runtime_error("読み出し不可領域からの読み出しを検出しました．");
-    }
-  }
+        if constexpr (T == OperandType::Destination) {
+          if (!protect::ProtectionMaster::isWritable(protection)) {
+            throw std::runtime_error("書き込み不可領域への書き込みを検出しました．");
+          }
+        } else if constexpr (T == OperandType::Source) {
+          if (!protect::ProtectionMaster::isReadable(protection)) {
+            throw std::runtime_error("読み出し不可領域からの読み出しを検出しました．");
+          }
+        }
 
-  protection_ = protection;
-}
+        return protection;
+      }()} {}
 
 template <OperandType T>
 OperandInfo<T>& OperandInfo<T>::operator=(OperandInfo<T>&& other) noexcept {
-  protection_ = std::move(other.protection_);
+  value_ = std::move(other.value_);
   address_ = std::move(other.address_);
+  protection_ = std::move(other.protection_);
 
   other.address_ = 0;
+  other.value_ = 0;
 
   return *this;
 }
 
 template <OperandType T>
-OperandInfo<T>::OperandInfo(OperandInfo<T>&& other) noexcept : address_{std::move(other.address_)}, protection_{std::move(other.protection_)} {
+OperandInfo<T>::OperandInfo(OperandInfo<T>&& other) noexcept
+    : address_{std::move(other.address_)}, value_{std::move(other.value_)}, protection_{std::move(other.protection_)} {
   other.address_ = 0;
+  other.value_ = 0;
 }
 
 template <OperandType T>
@@ -123,8 +129,37 @@ OperandType OperandInfo<T>::getOperandType() const noexcept {
   return T;
 }
 
-template class OperandInfo<OperandType::Destination>;
-template class OperandInfo<OperandType::Source>;
+template class seq::OperandInfo<OperandType::Destination>;
+template class seq::OperandInfo<OperandType::Source>;
+
+OperandSet::OperandSet(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst) : destOps_{}, srcOps_{} {
+  try {
+    for (const auto& op : inst.operands) {
+      if (op.visibility != ZYDIS_OPERAND_VISIBILITY_EXPLICIT) {
+        continue;
+      }
+
+      if (op.actions & ZYDIS_OPERAND_ACTION_WRITE) {
+        destOps_.emplace_back(hProcess, regs, inst.info, op);
+      } else if (op.actions & ZYDIS_OPERAND_ACTION_READ) {
+        srcOps_.emplace_back(hProcess, regs, inst.info, op);
+      }
+    }
+  } catch (...) {
+    throw;
+  }
+
+  destOps_.shrink_to_fit();
+  srcOps_.shrink_to_fit();
+}
+
+const DestInfo OperandSet::destAt(std::size_t no) const {
+  return destOps_.at(no);
+}
+
+const SrcInfo OperandSet::srcAt(std::size_t no) const {
+  return srcOps_.at(no);
+}
 
 static std::uint32_t calcAddress(const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op) noexcept {
   switch (op.type) {

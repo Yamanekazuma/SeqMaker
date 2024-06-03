@@ -1,4 +1,5 @@
-#include "SeqMaker.h"
+#include "SeqMaker/SeqMaker.h"
+
 #include "SeqMaker.hpp"
 #include "SeqUnitMnemonic.hpp"
 #include "SeqUnitOpcode.hpp"
@@ -190,7 +191,7 @@ static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noe
     return true;
   }
 
-  output = unit.operand(0);
+  output = unit.source(0).value();
   return false;
 }
 

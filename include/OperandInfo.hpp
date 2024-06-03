@@ -14,6 +14,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace seq {
 
@@ -28,10 +29,14 @@ class MemoryProtectionInfo {
   MemoryProtectionInfo(const MemoryProtectionInfo&) = default;
   MemoryProtectionInfo& operator=(const MemoryProtectionInfo&) = default;
 
-  inline explicit operator std::string() const noexcept { return string(); }
+  inline explicit operator std::string() const noexcept {
+    return string();
+  }
   const std::string string() const noexcept;
 
-  inline operator bool() const noexcept { return has_value(); }
+  inline operator bool() const noexcept {
+    return has_value();
+  }
   bool has_value() const noexcept;
 
   bool isMemoryAccessing() const noexcept;
@@ -50,6 +55,7 @@ class IOperandInfo {
  public:
   virtual const MemoryProtectionInfo& protection() const noexcept = 0;
   virtual std::uint32_t accessingAddress() const noexcept = 0;
+  virtual std::uint32_t value() const noexcept = 0;
 
   virtual bool isNone() const noexcept = 0;
   virtual bool isMemoryAccessing() const noexcept = 0;
@@ -69,8 +75,15 @@ class OperandInfo : public IOperandInfo {
   OperandInfo(const OperandInfo<T>&) = default;
   OperandInfo<T>& operator=(const OperandInfo<T>&) = default;
 
-  inline const MemoryProtectionInfo& protection() const noexcept override { return protection_; }
-  inline std::uint32_t accessingAddress() const noexcept override { return address_; }
+  inline const MemoryProtectionInfo& protection() const noexcept override {
+    return protection_;
+  }
+  inline std::uint32_t accessingAddress() const noexcept override {
+    return address_;
+  }
+  inline std::uint32_t value() const noexcept override {
+    return value_;
+  }
 
   bool isNone() const noexcept override;
   bool isMemoryAccessing() const noexcept override;
@@ -79,10 +92,30 @@ class OperandInfo : public IOperandInfo {
 
  private:
   std::uint32_t address_;
+  std::uint32_t value_;
   MemoryProtectionInfo protection_;
 };
 
 using DestInfo = OperandInfo<OperandType::Destination>;
 using SrcInfo = OperandInfo<OperandType::Source>;
+
+class OperandSet {
+ public:
+  OperandSet(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
+
+  const DestInfo destAt(std::size_t no) const;
+  const SrcInfo srcAt(std::size_t no) const;
+
+  inline const std::vector<DestInfo>& dest() const noexcept {
+    return destOps_;
+  }
+  inline const std::vector<SrcInfo>& src() const noexcept {
+    return srcOps_;
+  }
+
+ private:
+  std::vector<DestInfo> destOps_;
+  std::vector<SrcInfo> srcOps_;
+};
 
 }  // namespace seq

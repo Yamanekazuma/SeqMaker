@@ -8,8 +8,8 @@ class SeqUnitMnemonic : public SeqUnit {
  public:
   SeqUnitMnemonic(SeqUnitMnemonic&&) = default;
   SeqUnitMnemonic(const SeqUnitMnemonic&) = default;
-  SeqUnitMnemonic& operator=(SeqUnitMnemonic&&) = default;
-  SeqUnitMnemonic& operator=(const SeqUnitMnemonic&) = default;
+  SeqUnitMnemonic& operator=(SeqUnitMnemonic&&) = delete;
+  SeqUnitMnemonic& operator=(const SeqUnitMnemonic&) = delete;
 
  private:
   std::string mnemonic_;

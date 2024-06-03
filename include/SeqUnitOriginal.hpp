@@ -15,14 +15,11 @@ class SeqUnitOriginal : public SeqUnit {
  public:
   SeqUnitOriginal(SeqUnitOriginal&&) = default;
   SeqUnitOriginal(const SeqUnitOriginal&) = default;
-  SeqUnitOriginal& operator=(SeqUnitOriginal&&) = default;
-  SeqUnitOriginal& operator=(const SeqUnitOriginal&) = default;
+  SeqUnitOriginal& operator=(SeqUnitOriginal&&) = delete;
+  SeqUnitOriginal& operator=(const SeqUnitOriginal&) = delete;
 
  private:
   const std::string mnemonic_;
-  DestInfo dest_;
-  SrcInfo src1_;
-  SrcInfo src2_;
 
   SeqUnitOriginal(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
 

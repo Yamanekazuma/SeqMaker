@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types/Registers.h"
+#include "SeqMaker/types/Registers.h"
 
 #include <Zydis/Zydis.h>
 

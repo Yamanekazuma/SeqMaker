@@ -8,8 +8,8 @@ class SeqUnitOpcode : public SeqUnit {
  public:
   SeqUnitOpcode(SeqUnitOpcode&&) = default;
   SeqUnitOpcode(const SeqUnitOpcode&) = default;
-  SeqUnitOpcode& operator=(SeqUnitOpcode&&) = default;
-  SeqUnitOpcode& operator=(const SeqUnitOpcode&) = default;
+  SeqUnitOpcode& operator=(SeqUnitOpcode&&) = delete;
+  SeqUnitOpcode& operator=(const SeqUnitOpcode&) = delete;
 
  private:
   ZyanU8 opcode_;
