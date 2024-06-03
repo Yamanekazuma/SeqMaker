@@ -29,27 +29,42 @@ class SeqUnit {
 
   virtual ~SeqUnit() = 0;
 
-  inline explicit operator std::string() const noexcept { return string(); }
-  const std::string string() const noexcept { return str_; }
+  inline explicit operator std::string() const noexcept {
+    return string();
+  }
+  inline const std::string& string() const noexcept {
+    return str_;
+  }
 
   bool isInstructionOf(ZydisMnemonic mnemonic) const noexcept;
-  std::uint32_t operand(std::size_t no) const;
+
+  const DestInfo destination(std::size_t no) const;
+  const SrcInfo source(std::size_t no) const;
 
   bool setNote(const char* note) noexcept;
-  const std::string note() const noexcept { return note_; }
+  inline const std::string& note() const noexcept {
+    return note_;
+  }
 
-  std::size_t length() const noexcept { return length_; }
+  inline std::size_t length() const noexcept {
+    return length_;
+  }
+
+  inline const OperandSet& operands() const noexcept {
+    return operands_;
+  }
 
  protected:
-  const ZydisMnemonic mnemonic_;
-  std::vector<IOperandInfo*> operands_;
-  std::vector<DestInfo> allDestOps_;
-  std::vector<SrcInfo> allSrcOps_;
+  inline const ZydisMnemonic& mnemonic() const noexcept {
+    return mnemonic_;
+  }
 
  private:
   std::string str_{};
   std::string note_{};
-  std::size_t length_{};
+  const std::size_t length_;
+  const ZydisMnemonic mnemonic_;
+  const OperandSet operands_;
 
   // Factoryを介さずにSeqUnitクラス群を作成してほしくないので
   // Factoryをfriendクラスにしつつ、子クラスのコンストラクタをprivateに記述
@@ -66,7 +81,7 @@ template <class U>
 U SeqUnitFactory<U>::create(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst) {
   try {
     U unit{hProcess, regs, std::move(inst)};
-    static_cast<SeqUnit&>(unit).makeString();
+    unit.str_ = static_cast<SeqUnit&>(unit).makeString();
     return unit;
   } catch (...) {
     throw;

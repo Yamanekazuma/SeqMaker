@@ -20,9 +20,6 @@ class SeqUnitOriginal : public SeqUnit {
 
  private:
   const std::string mnemonic_;
-  DestInfo dest_;
-  SrcInfo src1_;
-  SrcInfo src2_;
 
   SeqUnitOriginal(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst);
 
