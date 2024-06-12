@@ -30,6 +30,7 @@ const SrcInfo SeqUnit::source(std::size_t no) const {
 bool SeqUnit::setNote(const char* note) noexcept {
   try {
     note_.assign(note);
+    str_.assign(makeString());
     return false;
   } catch (...) {
     return true;
