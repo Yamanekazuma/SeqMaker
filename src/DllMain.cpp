@@ -5,6 +5,8 @@
 #include "SeqUnitOpcode.hpp"
 #include "SeqUnitOriginal.hpp"
 
+#include <stringapiset.h>
+
 #include <cstdint>
 #include <stdexcept>
 
@@ -13,7 +15,14 @@
 #else
 #include <iostream>
 static void debug_print(const std::exception& e) {
-  std::cerr << e.what() << std::endl;
+  auto mbslen = strlen(e.what());
+  auto wcslen = MultiByteToWideChar(CP_UTF8, 0, e.what(), mbslen, nullptr, 0);
+
+  std::wstring wcs(wcslen, L'\0');
+  MultiByteToWideChar(CP_UTF8, 0, e.what(), mbslen, wcs.data(), wcs.length());
+
+  WriteConsoleW(GetStdHandle(STD_ERROR_HANDLE), wcs.data(), wcs.length(), nullptr, nullptr);
+  std::cerr << std::endl;
 }
 #endif
 
