@@ -41,6 +41,7 @@ static bool GetUnitDataInfo_is_call(const SeqUnit& unit, bool& output) noexcept;
 static bool GetUnitDataInfo_is_jmp(const SeqUnit& unit, bool& output) noexcept;
 static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noexcept;
 static bool GetUnitDataInfo_inst_length(const SeqUnit& unit, size_t& output) noexcept;
+static bool GetUnitDataInfo_access_violation(const SeqUnit& unit, SEQ_UNITINFO_VALUE_ACCESS_VIOLATION& output) noexcept;
 
 extern "C" {
 
@@ -133,6 +134,8 @@ SEQ_MAKER_EXPORT bool SeqMaker_GetUnitDataInfo(SEQ_UNITDATA unit, SEQ_UNITINFO_C
       return GetUnitDataInfo_branch_to(*u, *static_cast<uint32_t*>(output));
     case SEQ_UNITINFO_INST_LENGTH:
       return GetUnitDataInfo_inst_length(*u, *static_cast<size_t*>(output));
+    case SEQ_UNITINFO_ACCESS_VIOLATION:
+      return GetUnitDataInfo_access_violation(*u, *static_cast<SEQ_UNITINFO_VALUE_ACCESS_VIOLATION*>(output));
     default:
       assert("It should be unreachable.");
       return true;
@@ -206,5 +209,21 @@ static bool GetUnitDataInfo_branch_to(const SeqUnit& unit, uint32_t& output) noe
 
 static bool GetUnitDataInfo_inst_length(const SeqUnit& unit, size_t& output) noexcept {
   output = unit.length();
+  return false;
+}
+
+static bool GetUnitDataInfo_access_violation(const SeqUnit& unit, SEQ_UNITINFO_VALUE_ACCESS_VIOLATION& output) noexcept {
+  switch (unit.violation()) {
+    case SeqUnitViolation::None:
+      output = SEQ_UNITINFO_VALUE_ACCESS_VIOLATION_NONE;
+      break;
+    case SeqUnitViolation::Read:
+      output = SEQ_UNITINFO_VALUE_ACCESS_VIOLATION_READ;
+      break;
+    case SeqUnitViolation::Write:
+      output = SEQ_UNITINFO_VALUE_ACCESS_VIOLATION_WRITE;
+      break;
+  }
+
   return false;
 }

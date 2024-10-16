@@ -59,6 +59,7 @@ class IOperandInfo {
 
   virtual bool isNone() const noexcept = 0;
   virtual bool isMemoryAccessing() const noexcept = 0;
+  virtual bool isAccessViolation() const noexcept = 0;
 
   virtual OperandType getOperandType() const noexcept = 0;
 };
@@ -87,6 +88,7 @@ class OperandInfo : public IOperandInfo {
 
   bool isNone() const noexcept override;
   bool isMemoryAccessing() const noexcept override;
+  bool isAccessViolation() const noexcept override;
 
   OperandType getOperandType() const noexcept override;
 
@@ -94,6 +96,7 @@ class OperandInfo : public IOperandInfo {
   std::uint32_t address_;
   std::uint32_t value_;
   MemoryProtectionInfo protection_;
+  bool isAccessViolation_;
 };
 
 using DestInfo = OperandInfo<OperandType::Destination>;
@@ -113,9 +116,19 @@ class OperandSet {
     return srcOps_;
   }
 
+  inline bool isReadAccessViolation() const noexcept {
+    return isReadAccessViolation_;
+  }
+
+  inline bool isWriteAccessViolation() const noexcept {
+    return isWriteAccessViolation_;
+  }
+
  private:
   std::vector<DestInfo> destOps_;
   std::vector<SrcInfo> srcOps_;
+  bool isReadAccessViolation_;
+  bool isWriteAccessViolation_;
 };
 
 }  // namespace seq

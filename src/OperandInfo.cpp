@@ -7,6 +7,7 @@ using namespace seq;
 static std::uint32_t calcAddress(const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op) noexcept;
 static std::uint32_t convertRegisterToValue(const Registers& regs, const ZydisDecodedOperandReg& op) noexcept;
 static std::uint32_t convertImmediateToValue(const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op) noexcept;
+static bool isFakeMemoryAccessingMnemonic(ZydisMnemonic mnemonic) noexcept;
 
 MemoryProtectionInfo::MemoryProtectionInfo() noexcept : protection_{} {}
 MemoryProtectionInfo::MemoryProtectionInfo(protect::Protections protection) noexcept : protection_{protection} {}
@@ -62,7 +63,7 @@ OperandInfo<T>::OperandInfo() noexcept : address_{}, protection_{} {}
 
 template <OperandType T>
 OperandInfo<T>::OperandInfo(HANDLE hProcess, const Registers& regs, const ZydisDecodedInstruction& inst, const ZydisDecodedOperand& op)
-    : address_{calcAddress(regs, inst, op)}, value_{address_}, protection_{protect::Protections::None} {
+    : address_{calcAddress(regs, inst, op)}, value_{address_}, protection_{protect::Protections::None}, isAccessViolation_{false} {
   if (op.type != ZYDIS_OPERAND_TYPE_MEMORY) {
     return;
   }
@@ -84,11 +85,11 @@ OperandInfo<T>::OperandInfo(HANDLE hProcess, const Registers& regs, const ZydisD
 
   if constexpr (T == OperandType::Destination) {
     if (!protect::ProtectionMaster::isWritable(protection)) {
-      throw std::runtime_error("書き込み不可領域への書き込みを検出しました．");
+      isAccessViolation_ = true;
     }
   } else if constexpr (T == OperandType::Source) {
     if (!protect::ProtectionMaster::isReadable(protection)) {
-      throw std::runtime_error("読み出し不可領域からの読み出しを検出しました．");
+      isAccessViolation_ = true;
     }
   }
 
@@ -125,6 +126,11 @@ bool OperandInfo<T>::isMemoryAccessing() const noexcept {
 }
 
 template <OperandType T>
+bool OperandInfo<T>::isAccessViolation() const noexcept {
+  return isAccessViolation_;
+}
+
+template <OperandType T>
 OperandType OperandInfo<T>::getOperandType() const noexcept {
   return T;
 }
@@ -132,7 +138,16 @@ OperandType OperandInfo<T>::getOperandType() const noexcept {
 template class seq::OperandInfo<OperandType::Destination>;
 template class seq::OperandInfo<OperandType::Source>;
 
-OperandSet::OperandSet(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst) : destOps_{}, srcOps_{} {
+OperandSet::OperandSet(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst)
+    : destOps_{}, srcOps_{}, isReadAccessViolation_{false}, isWriteAccessViolation_{false} {
+  // メモリ参照の形をとるものの，実際にはメモリ参照を行わない命令については
+  // 例外的にメモリ参照先オペランドをNone（存在しないもの）として扱う．
+  // ただし，現時点ではいずれも他のオペランドも不要な情報であるため，
+  // 簡単のためにすべてのオペランドをNoneとして扱うものとする．
+  if (isFakeMemoryAccessingMnemonic(inst.info.mnemonic)) {
+    return;
+  }
+
   try {
     for (const auto& op : inst.operands) {
       if (op.visibility != ZYDIS_OPERAND_VISIBILITY_EXPLICIT) {
@@ -140,9 +155,13 @@ OperandSet::OperandSet(HANDLE hProcess, const Registers& regs, const ZydisDisass
       }
 
       if (op.actions & ZYDIS_OPERAND_ACTION_WRITE) {
-        destOps_.emplace_back(hProcess, regs, inst.info, op);
+        if ((destOps_.emplace_back(hProcess, regs, inst.info, op)).isAccessViolation()) {
+          isWriteAccessViolation_ = true;
+        }
       } else if (op.actions & ZYDIS_OPERAND_ACTION_READ) {
-        srcOps_.emplace_back(hProcess, regs, inst.info, op);
+        if ((srcOps_.emplace_back(hProcess, regs, inst.info, op)).isAccessViolation()) {
+          isReadAccessViolation_ = true;
+        }
       }
     }
   } catch (...) {
@@ -271,5 +290,17 @@ static std::uint32_t convertImmediateToValue(const Registers& regs, const ZydisD
     }
   } else {
     return static_cast<std::uint32_t>(op.imm.value.u & 0xFFFFFFFF);
+  }
+}
+
+static bool isFakeMemoryAccessingMnemonic(ZydisMnemonic mnemonic) noexcept {
+  switch (mnemonic) {
+    case ZYDIS_MNEMONIC_NOP:
+    case ZYDIS_MNEMONIC_LEA:
+    case ZYDIS_MNEMONIC_UD1:
+    case ZYDIS_MNEMONIC_UD0:
+      return true;
+    default:
+      return false;
   }
 }
