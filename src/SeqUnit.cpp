@@ -3,7 +3,15 @@
 using namespace seq;
 
 SeqUnit::SeqUnit(HANDLE hProcess, const Registers& regs, const ZydisDisassembledInstruction& inst)
-    : length_{inst.info.length}, mnemonic_{inst.info.mnemonic}, operands_{hProcess, regs, inst} {}
+    : length_{inst.info.length}, mnemonic_{inst.info.mnemonic}, operands_{hProcess, regs, inst}, violation_{[&]() -> decltype(violation_) {
+        if (operands_.isReadAccessViolation()) {
+          return SeqUnitViolation::Read;
+        } else if (operands_.isWriteAccessViolation()) {
+          return SeqUnitViolation::Write;
+        } else {
+          return SeqUnitViolation::None;
+        }
+      }()} {}
 
 SeqUnit::~SeqUnit() {}
 

@@ -14,6 +14,12 @@
 
 namespace seq {
 
+enum class SeqUnitViolation {
+  None,
+  Read,
+  Write,
+};
+
 class SeqUnit;
 
 template <class U>
@@ -54,6 +60,10 @@ class SeqUnit {
     return operands_;
   }
 
+  inline SeqUnitViolation violation() const noexcept {
+    return violation_;
+  }
+
  protected:
   inline const ZydisMnemonic& mnemonic() const noexcept {
     return mnemonic_;
@@ -65,6 +75,7 @@ class SeqUnit {
   const std::size_t length_;
   const ZydisMnemonic mnemonic_;
   const OperandSet operands_;
+  const SeqUnitViolation violation_{};
 
   // Factoryを介さずにSeqUnitクラス群を作成してほしくないので
   // Factoryをfriendクラスにしつつ、子クラスのコンストラクタをprivateに記述
